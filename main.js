@@ -1191,6 +1191,7 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
 
 const application = __webpack_require__(/*! application */ "application");
 const clipboard = __webpack_require__(/*! clipboard */ "clipboard");
+const EventBus = __webpack_require__(/*! ./event-bus.js */ "./src/event-bus.js").default;
 
 module.exports = {
     props: {
@@ -1200,7 +1201,7 @@ module.exports = {
     },
     methods: {
         copy() {
-            application.editDocument(() => clipboard.copyText(this.message));
+            EventBus.$emit('copy', this.message);
         },
         close() {
             this.dialog.close();
@@ -9868,6 +9869,23 @@ module.exports = g;
 
 /***/ }),
 
+/***/ "./src/event-bus.js":
+/*!**************************!*\
+  !*** ./src/event-bus.js ***!
+  \**************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.runtime.esm.js");
+// event-bus.js
+
+const EventBus = new vue__WEBPACK_IMPORTED_MODULE_0__["default"]();
+/* harmony default export */ __webpack_exports__["default"] = (EventBus);
+
+/***/ }),
+
 /***/ "./src/hello.vue":
 /*!***********************!*\
   !*** ./src/hello.vue ***!
@@ -9950,7 +9968,8 @@ __webpack_require__.r(__webpack_exports__);
 const styles = __webpack_require__(/*! ./styles.css */ "./src/styles.css");
 const Vue = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.runtime.esm.js").default;
 const hello = __webpack_require__(/*! ./hello.vue */ "./src/hello.vue").default
-
+const EventBus = __webpack_require__(/*! ./event-bus.js */ "./src/event-bus.js").default;
+const clipboard = __webpack_require__(/*! clipboard */ "clipboard");
 const { Text, Color } = __webpack_require__(/*! scenegraph */ "scenegraph");
 
 let dialog;
@@ -9958,9 +9977,16 @@ function getDialog() {
     if (dialog == null) {
         document.body.innerHTML = `<dialog><div id="container"></div></dialog>`
         dialog = document.querySelector("dialog");
+
         var app4 = new Vue({
             el: "#container",
             components: { hello },
+            mounted() {
+                EventBus.$on('copy', (message) => {
+                    clipboard.copyText(message);
+                    console.log(message);
+                });
+            },
             render(h) {
                 return h(hello, { props: { dialog } })
             }
@@ -9971,8 +9997,8 @@ function getDialog() {
 
 module.exports = {
     commands: {
-        menuCommand: function () {
-            getDialog().showModal();
+        menuCommand: async function () {
+            await getDialog().showModal();
         }
     }
 };

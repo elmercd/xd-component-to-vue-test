@@ -14,6 +14,7 @@
 <script>
     const application = require('application');
     const clipboard = require('clipboard');
+    const EventBus = require("./event-bus.js").default;
 
     module.exports = {
         props: {
@@ -23,7 +24,7 @@
         },
         methods: {
             copy() {
-                application.editDocument(() => clipboard.copyText(this.message));
+                EventBus.$emit('copy', this.message);
             },
             close() {
                 this.dialog.close();
